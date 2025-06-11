@@ -42,9 +42,9 @@ class LLMConfig(BaseModel):
     provider_type: str = "gemini"
     model_name: str = "gemini-1.5-flash-latest"
     api_key: str = Field(
-        default_factory=lambda: os.getenv(
-            "GEMINI_API_KEY", ""
-        )
+        default_factory=lambda: os.getenv("GEMINI_API_KEY", "")
+        # IMPORTANT: Set the GEMINI_API_KEY environment variable with your API key
+        # Never hardcode API keys in source code
     )
     temperature: float = 0.7
     max_tokens: int = 200
