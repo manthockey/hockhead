@@ -156,7 +156,11 @@ class MessageSanitizer:
                 text = ' '.join(sentences[:-1])
             else:
                 # Just truncate if we can't find sentence boundaries
-                text = text[:self.max_response_chars] + "..."
+                text = text[:self.max_response_chars]
+            
+            # Add ellipsis if not ending with punctuation
+            if not re.search(r'[.!?]$', text):
+                text = text + "..."
         
         # Handle common Twitch emotes for better TTS
         for emote, replacement in self.twitch_emotes.items():
@@ -185,6 +189,15 @@ class MessageSanitizer:
         # Ensure text ends with punctuation for better TTS prosody
         if text and not re.search(r'[.!?]$', text):
             text = text + '.'
+            
+        # Final length check to ensure we're within limits
+        if len(text) > self.max_response_chars + 3:  # +3 for possible ellipsis
+            text = text[:self.max_response_chars]
+            if not re.search(r'[.!?]$', text):
+                text = text + "..."
+            else:
+                # If it already ends with punctuation, no need for ellipsis
+                pass
             
         return text.strip()
 
