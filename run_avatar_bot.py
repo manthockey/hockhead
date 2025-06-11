@@ -109,11 +109,18 @@ async def run_avatar_bot(config: Config):
     # Set up signal handlers for graceful shutdown
     loop = asyncio.get_running_loop()
     
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(
-            sig,
-            lambda: asyncio.create_task(shutdown(orchestrator, loop))
-        )
+    # Use try/except for signal handlers since they're not supported on Windows
+    try:
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(
+                sig,
+                lambda: asyncio.create_task(shutdown(orchestrator, loop))
+            )
+        logger.debug("Signal handlers registered for graceful shutdown")
+    except NotImplementedError:
+        # Windows doesn't support add_signal_handler
+        logger.info("Signal handlers not available on this platform (Windows). Use Ctrl+C to stop.")
+        # No alternative signal handling on Windows - we'll rely on KeyboardInterrupt exception
     
     # Test components before starting
     logger.info("Testing components...")
