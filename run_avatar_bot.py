@@ -128,9 +128,9 @@ async def run_avatar_bot(config: Config):
     
     for component, status in test_results.items():
         if status:
-            logger.info(f"✓ {component} connection test passed")
+            logger.info(f"OK: {component} connection test passed")
         else:
-            logger.warning(f"✗ {component} connection test failed")
+            logger.warning(f"FAIL: {component} connection test failed")
     
     # Start the orchestrator
     logger.info("Starting orchestrator...")
