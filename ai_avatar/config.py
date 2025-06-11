@@ -9,11 +9,17 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from dotenv import load_dotenv
-from pydantic import BaseModel, Field, field_validator
+# Try to import dotenv, but don't fail if it's not available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # Define a no-op function as fallback
+    def load_dotenv():
+        """No-op fallback if python-dotenv is not installed."""
+        pass
 
-# Load environment variables from .env file if it exists
-load_dotenv()
+from pydantic import BaseModel, Field, field_validator
 
 
 class TwitchConfig(BaseModel):
