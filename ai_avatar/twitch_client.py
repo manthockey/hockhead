@@ -284,7 +284,7 @@ class TwitchChatClient:
             
         # Fallback to simpler parsing if regex fails
         try:
-            if "PRIVMSG" in line:
+            if "PRIVMSG" in line and "!" in line:  # Ensure the line has a '!' character which is required in valid IRC messages
                 # Extract username
                 username_part = line.split('!')[0]
                 if username_part.startswith(':'):
