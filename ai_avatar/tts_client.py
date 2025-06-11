@@ -10,8 +10,6 @@ import logging
 import os
 from typing import Dict, Optional
 
-import requests
-
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +17,7 @@ class ElevenLabsTTSClient:
     """
     Client for ElevenLabs Text-to-Speech API.
     
-    This client handles authentication, request formatting, and audio retrieval
+    This class handles authentication, request formatting, and audio retrieval
     from the ElevenLabs TTS service.
     """
 
@@ -50,6 +48,7 @@ class ElevenLabsTTSClient:
         self.similarity_boost = similarity_boost
         self.output_format = output_format
         self.base_url = "https://api.elevenlabs.io/v1"
+        self.tts_enabled = True
         
         # Set up headers
         self.headers = {
@@ -58,7 +57,15 @@ class ElevenLabsTTSClient:
             "Accept": f"audio/{self.output_format}"
         }
         
-        logger.info(f"Initialized ElevenLabs TTS client with voice ID: {voice_id}")
+        # Lazy import requests
+        try:
+            import requests
+            self.requests = requests
+            logger.info(f"Initialized ElevenLabs TTS client with voice ID: {voice_id}")
+        except ImportError:
+            logger.warning("Requests package not found. TTS functionality will be disabled.")
+            self.requests = None
+            self.tts_enabled = False
 
     async def synthesize(self, text: str) -> Optional[bytes]:
         """
@@ -70,6 +77,11 @@ class ElevenLabsTTSClient:
         Returns:
             bytes: The audio data, or None if synthesis failed
         """
+        # Early return if TTS is disabled
+        if not self.tts_enabled or self.requests is None:
+            logger.warning("TTS is disabled due to missing dependencies")
+            return None
+            
         if not text or not text.strip():
             logger.warning("Empty text provided for synthesis, skipping TTS call")
             return None
@@ -110,7 +122,7 @@ class ElevenLabsTTSClient:
             logger.error(f"Error synthesizing speech: {str(e)}")
             return None
 
-    def _synthesize_sync(self, url: str, payload: Dict) -> requests.Response:
+    def _synthesize_sync(self, url: str, payload: Dict) -> Optional:
         """
         Make a synchronous request to the TTS API (to be run in a thread pool).
         
@@ -121,7 +133,7 @@ class ElevenLabsTTSClient:
         Returns:
             requests.Response: The API response
         """
-        return requests.post(
+        return self.requests.post(
             url,
             json=payload,
             headers=self.headers,
