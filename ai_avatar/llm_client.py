@@ -9,9 +9,6 @@ import asyncio
 import logging
 from typing import Dict, List, Optional, Union
 
-import google.generativeai as genai
-from google.generativeai.types import GenerationConfig
-
 logger = logging.getLogger(__name__)
 
 
@@ -46,20 +43,29 @@ class GeminiLLMClient:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.system_prompt = system_prompt
+        self.model = None
         
-        # Configure the Gemini API
-        genai.configure(api_key=self.api_key)
-        
-        # Initialize model
-        self.model = genai.GenerativeModel(
-            model_name=self.model_name,
-            generation_config=GenerationConfig(
-                temperature=self.temperature,
-                max_output_tokens=self.max_tokens,
-            ),
-        )
-        
-        logger.info(f"Initialized Gemini LLM client with model: {model_name}")
+        # Lazy import Google Generative AI
+        try:
+            import google.generativeai as genai
+            from google.generativeai.types import GenerationConfig
+            
+            # Configure the Gemini API
+            genai.configure(api_key=self.api_key)
+            
+            # Initialize model
+            self.model = genai.GenerativeModel(
+                model_name=self.model_name,
+                generation_config=GenerationConfig(
+                    temperature=self.temperature,
+                    max_output_tokens=self.max_tokens,
+                ),
+            )
+            
+            logger.info(f"Initialized Gemini LLM client with model: {model_name}")
+        except ImportError:
+            logger.warning("Google Generative AI package not found. LLM functionality will be disabled.")
+            self.model = None
 
     async def generate_response(
         self,
@@ -78,6 +84,11 @@ class GeminiLLMClient:
         Returns:
             str: The generated response text, or None if generation failed
         """
+        # Early return if model is not available
+        if self.model is None:
+            logger.warning("Cannot generate response: Gemini model not initialized")
+            return None
+            
         try:
             # Create a new chat session
             chat = self.model.start_chat(history=[])
