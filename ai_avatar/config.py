@@ -43,7 +43,7 @@ class LLMConfig(BaseModel):
     model_name: str = "gemini-1.5-flash-latest"
     api_key: str = Field(
         default_factory=lambda: os.getenv(
-            "GEMINI_API_KEY", "AIzaSyC1CgTurH_IOd4TrnzPIVpmWn3f7Rh37Cw"
+            "GEMINI_API_KEY", ""
         )
     )
     temperature: float = 0.7
