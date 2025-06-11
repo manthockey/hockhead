@@ -1,9 +1,14 @@
-google-generativeai>=0.4.0
+# Core runtime dependencies
+aiohttp>=3.9
+anyio>=4.3
 pydantic>=2.6
 requests>=2.31
-aiohttp>=3.9
 pydle>=0.9.6
 python-dotenv>=1.0
-anyio>=4.3
+
+# Optional / feature-specific
+google-generativeai>=0.4.0   # optional – only needed when using Gemini LLM
+
+# Development / testing
 pytest>=8.2
 pytest-asyncio>=0.23
